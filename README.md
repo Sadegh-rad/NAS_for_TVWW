@@ -1,46 +1,131 @@
-# Neural Architecture Search for Tiny Visual Wake Words (NAS-TVWW)
+# Neural Architecture Search for Tiny Visual Wake Words
 
-This project implements Neural Architecture Search (NAS) using Bayesian optimization and NASWOT scoring to find optimal CNN architectures for Visual Wake Words classification on resource-constrained devices.
+A PyTorch implementation of Neural Architecture Search (NAS) using NASWOT (Neural Architecture Search Without Training) for the Visual Wake Words dataset, designed for efficient tiny model deployment.
 
-## 🎯 Project Overview
+## Overview
 
-Visual Wake Words is a computer vision task that involves detecting the presence of persons in images. This project focuses on automatically finding efficient neural network architectures that can run on tiny devices while maintaining good accuracy through:
+This project implements a training-free neural architecture search method that evaluates CNN architectures without full training, making it suitable for resource-constrained environments. The approach uses NASWOT scoring combined with Bayesian optimization to find optimal architectures for binary image classification.
 
-- **Neural Architecture Search**: Automated search for optimal CNN architectures using random sampling
-- **NASWOT Scoring**: Neural Architecture Search Without Training for efficient model evaluation
-- **Bayesian Optimization**: Multi-objective optimization balancing accuracy, model size, and computational efficiency
-- **Hardware-aware Design**: Considers FLOPs, parameters, and memory constraints for edge deployment
+## Project Structure
 
-## 🏗️ Architecture Search Space
-
-The search space includes configurable parameters for:
-
-### Convolutional Layers (Layers 4-6)
-- **Number of filters**: 16-256 filters per layer
-- **Kernel sizes**: 3×3 or 5×5 kernels
-- **Padding**: 1 or 2 pixels
-- **Dropout rates**: 0.0-0.5 for regularization
-- **Max pooling**: 2×2 or 3×3 kernels with different strides
-
-### Fully Connected Layers
-- **Number of layers**: 1-3 FC layers
-- **Neurons per layer**: 16-128 neurons
-- **Dropout rates**: 0.0-0.5 for regularization
-
-## 📊 Dataset
-
-- **Dataset**: Visual Wake Words (VWW) - derived from COCO dataset
-- **Task**: Binary classification (person/no-person)
-- **Classes**: 2 (Person present vs. Person absent)
-- **Image size**: 224×224 pixels (resized from original)
-- **Preprocessing**: Data augmentation (horizontal flip, rotation, color jitter) and normalization
-
-## 🚀 Getting Started
-
-### Prerequisites
-```bash
-pip install -r requirements.txt
 ```
+NAS_for_TVWW/
+├── 4A.ipynb                    # Main implementation notebook
+├── nas_model.py                # CNN model and training functions
+├── naswot_scoring.py           # NASWOT scoring implementation  
+├── search_space.py             # Hyperparameter search space utilities
+├── requirements.txt            # Dependencies
+├── project_report.pdf          # Original project report
+└── README.md                   # This file
+```
+## Key Components
+
+### 1. CustomDNN Architecture
+- Configurable CNN with 3 convolutional blocks
+- Batch normalization and dropout for regularization
+- Variable fully connected layers  
+- Designed for 96x96 input images
+
+### 2. NASWOT Scoring
+- Training-free architecture evaluation
+- Uses ReLU activation patterns to compute architecture quality
+- Significantly faster than traditional training-based evaluation
+
+### 3. Search Space
+- Configurable number of filters (16, 32, 64, 128, 256)
+- Kernel sizes (3x3, 5x5)
+- Dropout rates (0.1, 0.2, 0.3)
+- Fully connected layer configurations
+
+### 4. Dataset Handling
+- Visual Wake Words dataset from COCO
+- Balanced dataset creation for binary classification
+- Custom data transformations and augmentation
+
+## Requirements
+
+```
+torch>=1.9.0
+torchvision>=0.10.0
+pyvww
+bayesian-optimization
+torchinfo
+matplotlib
+seaborn
+tqdm
+numpy
+Pillow
+```
+
+## Usage
+
+### Google Colab Setup
+The main implementation is in `4A.ipynb` designed for Google Colab:
+
+1. Mount Google Drive for dataset access
+2. Install required packages  
+3. Load and preprocess Visual Wake Words dataset
+4. Generate candidate architectures
+5. Evaluate using NASWOT scoring
+6. Apply Bayesian optimization for hyperparameter search
+7. Train best architectures
+8. Test with camera inference
+
+### Local Usage
+You can also use the extracted modules locally:
+
+```python
+from nas_model import CustomDNN, train_and_evaluate_model
+from naswot_scoring import compute_naswot
+from search_space import generate_hyperparameters
+
+# Generate hyperparameters
+hyperparams = generate_hyperparameters()
+
+# Create model
+model = CustomDNN(hyperparams)
+
+# Compute NASWOT score
+sample_input = torch.randn(1, 3, 96, 96)
+score = compute_naswot(model, sample_input)
+```
+## Key Features
+
+- **Training-Free Evaluation**: Uses NASWOT for rapid architecture assessment
+- **Bayesian Optimization**: Efficient hyperparameter search
+- **Balanced Dataset**: Handles class imbalance in Visual Wake Words
+- **Mobile-Friendly**: Architectures optimized for edge deployment
+- **Interactive Inference**: Camera capture and real-time prediction
+
+## Architecture Search Space
+
+The search includes:
+- **Convolutional Layers**: 3 configurable blocks
+- **Filter Counts**: Progressive increase (16→32→64→128→256)
+- **Kernel Sizes**: 3x3 and 5x5 convolutions  
+- **Regularization**: Dropout (0.1-0.3), Batch normalization
+- **Pooling**: Max pooling with stride 2
+- **Fully Connected**: 2-3 layers with 32-128 neurons
+
+## Results
+
+The notebook demonstrates:
+- Comparison between NASWOT-selected and architecture-score-selected models
+- Training curves and accuracy metrics
+- Real-time inference capabilities
+- Model size and efficiency analysis
+
+## Google Colab Integration
+
+The implementation leverages Google Colab features:
+- GPU acceleration for model training
+- Google Drive integration for dataset storage
+- Camera access for live inference testing  
+- Visualization tools for results analysis
+
+## Citation
+
+Based on research in Neural Architecture Search and the Visual Wake Words dataset. This implementation focuses on efficient, training-free architecture evaluation suitable for edge AI applications.
 
 ### Running the Project
 1. Clone the repository
